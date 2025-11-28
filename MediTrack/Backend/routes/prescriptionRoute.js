@@ -1,10 +1,11 @@
+// Backend/routes/prescriptionRoute.js
 import express from "express";
-import { 
-  createPrescription,
-  getAllPrescriptionsForDoctor,
-  getPrescriptionsForPatient,
-  getSinglePrescription,
-  updatePrescription
+import {
+    createPrescription,
+    getAllPrescriptionsForDoctor,
+    getPrescriptionsForPatient,
+    getSinglePrescription,
+    updatePrescription,
 } from "../controllers/prescriptionController.js";
 
 import { protectDoctor } from "../middlewares/authDoctor.js";
@@ -23,16 +24,14 @@ router.get("/doctor/all", protectDoctor, getAllPrescriptionsForDoctor);
 // Doctor updates a prescription
 router.put("/:id", protectDoctor, updatePrescription);
 
-
 /* ------------------------- PATIENT PROTECTED ROUTES ------------------------- */
 
 // Patient views their own prescriptions
 router.get("/patient/all", protectPatient, getPrescriptionsForPatient);
 
-
 /* ------------------------- COMMON ROUTE ------------------------- */
 
-// Both doctor + patient can view a single prescription
+// Both doctor + patient (or even public) can view a single prescription
 router.get("/:id", getSinglePrescription);
 
 export default router;

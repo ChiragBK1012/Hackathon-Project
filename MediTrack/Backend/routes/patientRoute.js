@@ -1,11 +1,11 @@
+// Backend/routes/patientRoute.js
 import express from "express";
-import { 
-  registerPatient,
-  loginPatient,
-  getPatientProfile,
-  updatePatientProfile
+import {
+    registerPatient,
+    loginPatient,
+    getPatientProfile,
+    updatePatientProfile,
 } from "../controllers/patientController.js";
-
 import { protectPatient } from "../middlewares/authPatient.js";
 
 const router = express.Router();

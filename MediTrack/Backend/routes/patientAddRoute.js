@@ -1,13 +1,17 @@
+// Backend/routes/patientAddRoute.js
 import express from "express";
-import { addPatient, getPatients } from "../controllers/patientAddController.js";
+import {
+    addPatient,
+    getPatients,
+} from "../controllers/patientAddController.js";
 import { protectDoctor } from "../middlewares/authDoctor.js";
 
 const router = express.Router();
 
-// Protected route: only logged-in doctors can add patients
+// POST /api/doctor/patients  -> add a patient
 router.post("/", protectDoctor, addPatient);
 
-// Get all patients added by this doctor
+// GET /api/doctor/patients  -> get all added patients
 router.get("/", protectDoctor, getPatients);
 
 export default router;

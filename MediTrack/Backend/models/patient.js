@@ -1,16 +1,20 @@
+// Backend/models/patient.js
 import mongoose from "mongoose";
 
-const patientSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+const patientSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true },
+        email: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
 
-    age: Number,
-    gender: String,
-    contact: String,
-    conditions: [String],
+        age: Number,
+        gender: String,
+        contact: String,
+        conditions: [String],
 
-    assignedDoctor: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor" }
-}, { timestamps: true });
+        assignedDoctor: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor" },
+    },
+    { timestamps: true }
+);
 
 export default mongoose.model("Patient", patientSchema);

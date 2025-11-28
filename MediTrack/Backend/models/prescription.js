@@ -1,21 +1,36 @@
+// Backend/models/prescription.js
 import mongoose from "mongoose";
 
-const prescriptionSchema = new mongoose.Schema({
-    doctor: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor", required: true },
-    patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient", required: true },
+const medicineSchema = new mongoose.Schema(
+    {
+        name: { type: String, required: true },
+        dosage: { type: String, required: true },
+        time: [String], // ["09:00", "15:00"]
+        durationInDays: Number,
+        instructions: String,
+    },
+    { _id: false }
+);
 
-    medicines: [
-        {
-            name: String,
-            dosage: String,
-            time: [String],          // ["Morning", "Night"]
-            durationInDays: Number,
-            instructions: String
-        }
-    ],
+const prescriptionSchema = new mongoose.Schema(
+    {
+        doctor: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Doctor",
+            required: true,
+        },
+        patient: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Patient",
+            required: true,
+        },
 
-    diagnosis: String,
-    notes: String
-}, { timestamps: true });
+        medicines: [medicineSchema],
+
+        diagnosis: String,
+        notes: String,
+    },
+    { timestamps: true }
+);
 
 export default mongoose.model("Prescription", prescriptionSchema);

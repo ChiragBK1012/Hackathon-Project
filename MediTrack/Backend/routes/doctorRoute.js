@@ -1,11 +1,11 @@
+// Backend/routes/doctorRoute.js
 import express from "express";
-import { 
-  registerDoctor,
-  loginDoctor,
-  getDoctorProfile,
-  updateDoctorProfile
+import {
+    registerDoctor,
+    loginDoctor,
+    getDoctorProfile,
+    updateDoctorProfile,
 } from "../controllers/doctorController.js";
-
 import { protectDoctor } from "../middlewares/authDoctor.js";
 
 const router = express.Router();

@@ -1,3 +1,4 @@
+// Backend/index.js
 import "dotenv/config";
 import express from "express";
 import connectDB from "./config/db.js";
@@ -8,6 +9,7 @@ import cookieParser from "cookie-parser";
 import doctorRoutes from "./routes/doctorRoute.js";
 import patientRoutes from "./routes/patientRoute.js";
 import prescriptionRoutes from "./routes/prescriptionRoute.js";
+import patientAddRoutes from "./routes/patientAddRoute.js";
 
 const app = express();
 
@@ -17,10 +19,10 @@ app.use(cookieParser());
 
 // CORS
 app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    credentials: true,
-  })
+    cors({
+        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        credentials: true,
+    })
 );
 
 // Connect MongoDB
@@ -28,18 +30,19 @@ connectDB();
 
 // API Routes
 app.use("/api/doctor", doctorRoutes);
+app.use("/api/doctor/patients", patientAddRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/prescription", prescriptionRoutes);
 
 // Home Route
 app.get("/", (req, res) => {
-  res.send("🚀 Doctor-Patient-Prescription API Running...");
+    res.send("🚀 MediTrack Doctor-Patient-Prescription API Running...");
 });
 
-// Error handling middleware (optional)
+// Error handling middleware (fallback)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Server Error" });
+    console.error("Global error handler:", err.stack);
+    res.status(500).json({ message: "Server Error" });
 });
 
 // Start server
