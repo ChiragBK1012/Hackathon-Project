@@ -1,13 +1,21 @@
-const router = require("express").Router();
-const auth = require("../middlewares/authMiddleware");
-const {
-    createOrUpdateProfile,
-    getProfile,
-    getMyReminders,
-} = require("../controllers/patientController");
+import express from "express";
+import { 
+  registerPatient,
+  loginPatient,
+  getPatientProfile,
+  updatePatientProfile
+} from "../controllers/patientController.js";
 
-router.post("/profile", auth, createOrUpdateProfile);
-router.get("/profile", auth, getProfile);
-router.get("/reminders", auth, getMyReminders);
+import { protectPatient } from "../middlewares/authPatient.js";
 
-module.exports = router;
+const router = express.Router();
+
+// Public Routes
+router.post("/register", registerPatient);
+router.post("/login", loginPatient);
+
+// Protected Routes
+router.get("/profile", protectPatient, getPatientProfile);
+router.put("/profile", protectPatient, updatePatientProfile);
+
+export default router;

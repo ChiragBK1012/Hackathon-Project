@@ -1,72 +1,74 @@
-const Reminder = require("../models/reminder");
-const Patient = require("../models/patient");
-const User = require("../models/user");
+import Patient from "../models/patient.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
-exports.getMyReminders = async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        // First try: reminders where patientId equals the user id
-        let reminders = await Reminder.find({ patientId: userId }).populate(
-            "doctorId",
-            "name email"
-        );
-
-        // If none found, try finding a Patient doc for this user and search by that _id
-        if (!reminders || reminders.length === 0) {
-            const patientDoc = await Patient.findOne({ userId });
-            if (patientDoc) {
-                reminders = await Reminder.find({ patientId: patientDoc._id })
-                    .populate("doctorId", "name email")
-                    .populate({ path: "patientId", populate: { path: "userId", select: "name email" } });
-            }
-        } else {
-            // If reminders were found by userId, attach basic patient info from User model
-            const user = await User.findById(userId).select("name email");
-            reminders = reminders.map((r) => ({ ...r.toObject(), patientInfo: user }));
-        }
-
-        // Ensure we return an array (empty if nothing found)
-        return res.json(reminders || []);
-    } catch (err) {
-        res.status(500).json({ msg: err.message });
-    }
+const generateToken = (patientId) => {
+  return jwt.sign({ patientId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-exports.createOrUpdateProfile = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { age, contact, conditions, doctorId } = req.body;
+// ================= REGISTER PATIENT =================
+export const registerPatient = async (req, res) => {
+  try {
+    const { name, email, password, age, gender } = req.body;
 
-        // Upsert patient profile linked to userId
-        const update = {
-            role: "patient",
-            age: age || undefined,
-            contact: contact || undefined,
-            conditions: Array.isArray(conditions) ? conditions : conditions ? [conditions] : [],
-            doctorId: doctorId || undefined,
-            updatedAt: Date.now(),
-        };
+    const exist = await Patient.findOne({ email });
+    if (exist) return res.status(409).json({ message: "Patient already exists" });
 
-        const patient = await Patient.findOneAndUpdate(
-            { userId },
-            { $set: update, $setOnInsert: { userId } },
-            { new: true, upsert: true }
-        );
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        res.json({ msg: "Patient profile saved", patient });
-    } catch (err) {
-        res.status(500).json({ msg: err.message });
-    }
+    const patient = await Patient.create({
+      name,
+      email,
+      password: hashedPassword,
+      age,
+      gender,
+    });
+
+    res.cookie("patientToken", generateToken(patient._id));
+    res.status(201).json({ message: "Patient registered", patient });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.getProfile = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const patient = await Patient.findOne({ userId }).populate("userId", "name email");
-        if (!patient) return res.status(404).json({ msg: "Patient profile not found" });
-        res.json(patient);
-    } catch (err) {
-        res.status(500).json({ msg: err.message });
-    }
+// ================= LOGIN PATIENT =================
+export const loginPatient = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const patient = await Patient.findOne({ email });
+    if (!patient) return res.status(404).json({ message: "Patient not found" });
+
+    const match = await bcrypt.compare(password, patient.password);
+    if (!match) return res.status(400).json({ message: "Invalid password" });
+
+    res.cookie("patientToken", generateToken(patient._id));
+    res.status(200).json({ message: "Login successful", patient });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ================= GET PROFILE =================
+export const getPatientProfile = async (req, res) => {
+  try {
+    res.json(req.patient);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ================= UPDATE PROFILE =================
+export const updatePatientProfile = async (req, res) => {
+  try {
+    const updates = req.body;
+
+    const patient = await Patient.findByIdAndUpdate(req.patientId, updates, {
+      new: true,
+    });
+
+    res.json({ message: "Patient profile updated", patient });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

@@ -1,7 +1,21 @@
-const router = require("express").Router();
-const auth = require("../middlewares/authMiddleware");
-const { getPatients } = require("../controllers/doctorController");
+import express from "express";
+import { 
+  registerDoctor,
+  loginDoctor,
+  getDoctorProfile,
+  updateDoctorProfile
+} from "../controllers/doctorController.js";
 
-router.get("/patients", auth, getPatients);
+import { protectDoctor } from "../middlewares/authDoctor.js";
 
-module.exports = router;
+const router = express.Router();
+
+// Public Routes
+router.post("/register", registerDoctor);
+router.post("/login", loginDoctor);
+
+// Protected Routes
+router.get("/profile", protectDoctor, getDoctorProfile);
+router.put("/profile", protectDoctor, updateDoctorProfile);
+
+export default router;

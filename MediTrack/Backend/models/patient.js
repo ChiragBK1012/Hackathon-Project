@@ -1,19 +1,16 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-    role: { type: String, default: "patient" },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+
     age: Number,
+    gender: String,
     contact: String,
     conditions: [String],
-    doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date },
-});
 
-patientSchema.pre("save", function (next) {
-    this.updatedAt = Date.now();
-    next();
-});
+    assignedDoctor: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor" }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Patient", patientSchema);
+export default mongoose.model("Patient", patientSchema);

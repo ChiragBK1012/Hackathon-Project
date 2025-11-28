@@ -1,26 +1,47 @@
-require("dotenv").config();
-const express = require("express");
-const connectDB = require("./config/db");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
+import "dotenv/config";
+import express from "express";
+import connectDB from "./config/db.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+
+// Routes
+import doctorRoutes from "./routes/doctorRoute.js";
+import patientRoutes from "./routes/patientRoute.js";
+import prescriptionRoutes from "./routes/prescriptionRoute.js";
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// Enable CORS and allow credentials (cookies).
-// If you have a frontend URL, set CLIENT_URL in .env to restrict origin.
+// CORS
 app.use(
-	cors({ origin: process.env.CLIENT_URL || true, credentials: true })
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+  })
 );
 
+// Connect MongoDB
 connectDB();
 
-app.use("/api/auth", require("./routes/authRoute"));
-app.use("/api/doctor", require("./routes/doctorRoute"));
-app.use("/api/reminder", require("./routes/reminderRoute"));
-app.use("/api/patient", require("./routes/patientRoute"));
+// API Routes
+app.use("/api/doctor", doctorRoutes);
+app.use("/api/patient", patientRoutes);
+app.use("/api/prescription", prescriptionRoutes);
 
+// Home Route
+app.get("/", (req, res) => {
+  res.send("🚀 Doctor-Patient-Prescription API Running...");
+});
+
+// Error handling middleware (optional)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Server Error" });
+});
+
+// Start server
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
