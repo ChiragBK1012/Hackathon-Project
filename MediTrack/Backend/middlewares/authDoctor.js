@@ -4,6 +4,12 @@ import Doctor from "../models/doctor.js";
 
 export const protectDoctor = async (req, res, next) => {
     try {
+        if (!process.env.JWT_SECRET) {
+            return res
+                .status(500)
+                .json({ message: "Server misconfigured: JWT_SECRET missing" });
+        }
+
         // From cookie or Authorization header
         let token = req.cookies?.token;
 

@@ -14,6 +14,14 @@ const generateToken = doctorId => {
     });
 };
 
+// Remove sensitive fields before returning doctor
+const sanitizeDoctor = doctor => {
+    if (!doctor) return doctor;
+    const docObj = doctor.toObject ? doctor.toObject() : { ...doctor };
+    delete docObj.password;
+    return docObj;
+};
+
 // ================= REGISTER DOCTOR =================
 export const registerDoctor = async (req, res) => {
     try {
@@ -49,7 +57,7 @@ export const registerDoctor = async (req, res) => {
 
         res.status(201).json({
             message: "Doctor registered successfully",
-            doctor,
+            doctor: sanitizeDoctor(doctor),
         });
     } catch (error) {
         console.error("Register doctor error:", error);
@@ -78,7 +86,10 @@ export const loginDoctor = async (req, res) => {
             sameSite: "lax",
         });
 
-        res.status(200).json({ message: "Login successful", doctor });
+        res.status(200).json({
+            message: "Login successful",
+            doctor: sanitizeDoctor(doctor),
+        });
     } catch (error) {
         console.error("Login doctor error:", error);
         res.status(500).json({ message: "Server error" });

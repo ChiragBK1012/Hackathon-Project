@@ -4,6 +4,12 @@ import Patient from "../models/patient.js";
 
 export const protectPatient = async (req, res, next) => {
     try {
+        if (!process.env.JWT_SECRET) {
+            return res
+                .status(500)
+                .json({ message: "Server misconfigured: JWT_SECRET missing" });
+        }
+
         let token = req.cookies?.token;
 
         if (!token && req.headers.authorization?.startsWith("Bearer ")) {

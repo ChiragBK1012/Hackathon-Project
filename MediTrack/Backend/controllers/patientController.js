@@ -11,6 +11,14 @@ const generateToken = patientId => {
     return jwt.sign({ patientId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
+// Remove sensitive fields before returning patient
+const sanitizePatient = patient => {
+    if (!patient) return patient;
+    const patientObj = patient.toObject ? patient.toObject() : { ...patient };
+    delete patientObj.password;
+    return patientObj;
+};
+
 // ================= REGISTER PATIENT =================
 export const registerPatient = async (req, res) => {
     try {
@@ -44,7 +52,10 @@ export const registerPatient = async (req, res) => {
             sameSite: "lax",
         });
 
-        res.status(201).json({ message: "Patient registered", patient });
+        res.status(201).json({
+            message: "Patient registered",
+            patient: sanitizePatient(patient),
+        });
     } catch (error) {
         console.error("Register patient error:", error);
         res.status(500).json({ message: "Server error" });
@@ -72,7 +83,10 @@ export const loginPatient = async (req, res) => {
             sameSite: "lax",
         });
 
-        res.status(200).json({ message: "Login successful", patient });
+        res.status(200).json({
+            message: "Login successful",
+            patient: sanitizePatient(patient),
+        });
     } catch (error) {
         console.error("Login patient error:", error);
         res.status(500).json({ message: "Server error" });
